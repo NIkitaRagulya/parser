@@ -9,7 +9,7 @@ url = 'https://www.petsonic.com/snacks-huesos-para-perros/?p='
 all_products_url = []
 
 doc = Nokogiri::HTML(Curl.get('https://www.petsonic.com/snacks-huesos-para-perros/').body_str)
-doc.xpath('//*[@id = "product_list"]/li').first(3).each do |product|
+doc.xpath('//*[@id = "product_list"]/li').each do |product|
   all_products_url |= [product.xpath('.//a[@class="product-name"]/@href')]
 end
 
@@ -18,16 +18,16 @@ $i = 1
 $previous = all_products_url.length
 $current = all_products_url.length
 
-# while true do
-#   $i += 1
-#   doc = Nokogiri::HTML(Curl.get(url + $i.to_s).body_str)
-#   doc.xpath('//*[@id = "product_list"]/li').each do |product|
-#     all_products_url |= [product.xpath('.//a[@class="product-name"]/@href')]
-#   end
-#   $current = all_products_url.length
-#   break if $previous == $current
-#   $previous = $current
-# end
+while true do
+  $i += 1
+  doc = Nokogiri::HTML(Curl.get(url + $i.to_s).body_str)
+  doc.xpath('//*[@id = "product_list"]/li').each do |product|
+    all_products_url |= [product.xpath('.//a[@class="product-name"]/@href')]
+  end
+  $current = all_products_url.length
+  break if $previous == $current
+  $previous = $current
+end
 
 Product = Struct.new(:name, :price, :image)
 product_array = []
