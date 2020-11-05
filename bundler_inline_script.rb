@@ -29,24 +29,23 @@ $current = all_products_url.length
 #   $previous = $current
 # end
 
-product_hash = {name: [], price: [], image: []}
+Product = Struct.new(:name, :price, :image)
+product_array = []
 
 all_products_url.each do |product_url|
   product = Nokogiri::HTML(Curl.get(product_url.first.value).body_str)
   product.xpath('//ul[@class="attribute_radio_list pundaline-variations"]/li').each do |variation|
-    product_hash[:name].push(product.xpath('.//h1[@class="product_main_name"]').text + variation.xpath('.//span[@class="radio_label"]').text)
-    product_hash[:price].push(variation.xpath('.//span[@class="price_comb"]').text)
-    product_hash[:image].push(product.xpath('.//img[@id="bigpic"]/@src').first.value)
+    product_name = product.xpath('.//h1[@class="product_main_name"]').text + variation.xpath('.//span[@class="radio_label"]').text
+    product_price = variation.xpath('.//span[@class="price_comb"]').text
+    product_image = product.xpath('.//img[@id="bigpic"]/@src').first.value
+
+    product_array.push(Product.new(product_name, product_price, product_image))
   end
 end
 
-CSV.open("file.csv", "a+") {|csv| product_hash.to_a.each {|elem| csv << elem} }
-
-CSV.open("file.csv", "a+") do |csv|
-  csv << %w(Names Prices Images)
-  product_hash.values.each do |line|
-    csv << line
+CSV.open('file.csv', "a+") do |csv|
+  csv << ["Название","Цена","Изображение"]
+  product_array.each do |product|
+      csv << [product.name, product.price, product.image]
   end
 end
-
-puts product_hash
