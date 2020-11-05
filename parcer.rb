@@ -2,10 +2,8 @@ require 'curb'
 require 'nokogiri'
 require 'csv'
 
-puts 'Enter url below:'
-@url = gets.chomp
-puts 'Enter file name(with .csv) below:'
-@file_name = gets.chomp
+@url = ARGV[0]
+@file_name = ARGV[1]
 
 all_products_url = []
 
@@ -33,7 +31,7 @@ all_products_url.each do |product_url|
   product = Nokogiri::HTML(Curl.get(product_url.first.value).body_str)
   product.xpath('//ul[@class="attribute_radio_list pundaline-variations"]/li').each do |variation|
     print '.'
-    product_name = product.xpath('.//h1[@class="product_main_name"]').text + '-' +
+    product_name = product.xpath('.//h1[@class="product_main_name"]').text + ' - ' +
                    variation.xpath('.//span[@class="radio_label"]').text
     product_price = variation.xpath('.//span[@class="price_comb"]').text
     product_image = product.xpath('.//img[@id="bigpic"]/@src').first.value
@@ -41,6 +39,8 @@ all_products_url.each do |product_url|
     product_array.push(Product.new(product_name, product_price, product_image))
   end
 end
+
+puts ''
 
 CSV.open(@file_name, 'a+') do |csv|
   csv << ['Name', 'Price', 'Image url']
